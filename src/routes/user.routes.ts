@@ -3,7 +3,14 @@ import { Router } from 'express';
 import CreateUserService from '../services/CreateUserService';
 
 const AppointmentsRouter = Router();
-
+interface ResponseUserDTO {
+  name: string;
+  email: string;
+  password?: string;
+  created_at: Date;
+  updated_at: Date;
+  id: string;
+}
 AppointmentsRouter.post('/', async (request, response) => {
   try {
     const { name, email, password } = request.body;
@@ -14,7 +21,9 @@ AppointmentsRouter.post('/', async (request, response) => {
       email,
       password,
     });
-    return response.json(user);
+    const newUser: ResponseUserDTO = { ...user };
+    delete newUser.password;
+    return response.json(newUser);
   } catch (err) {
     return response.status(400).json({ error: err.message });
   }
