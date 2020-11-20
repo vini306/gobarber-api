@@ -1,8 +1,14 @@
 import { Router } from 'express';
 
+import multer from 'multer';
 import CreateUserService from '../services/CreateUserService';
+import ensureAuthenticated from '../middlewares/ensureAuthenticated';
+import uploadConfig from '../config/upload';
 
-const AppointmentsRouter = Router();
+const UsersRouter = Router();
+
+const upload = multer(uploadConfig);
+
 interface ResponseUserDTO {
   name: string;
   email: string;
@@ -11,7 +17,7 @@ interface ResponseUserDTO {
   updated_at: Date;
   id: string;
 }
-AppointmentsRouter.post('/', async (request, response) => {
+UsersRouter.post('/', async (request, response) => {
   try {
     const { name, email, password } = request.body;
 
@@ -29,4 +35,12 @@ AppointmentsRouter.post('/', async (request, response) => {
   }
 });
 
-export default AppointmentsRouter;
+UsersRouter.patch(
+  '/avatar',
+  ensureAuthenticated,
+  upload.single('avatar'),
+  (request, response) => {
+    return response.json();
+  },
+);
+export default UsersRouter;
