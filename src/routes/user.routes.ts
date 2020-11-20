@@ -1,7 +1,9 @@
 import { Router } from 'express';
-
 import multer from 'multer';
+
 import CreateUserService from '../services/CreateUserService';
+import UpdateUserService from '../services/UpdateUserService';
+
 import ensureAuthenticated from '../middlewares/ensureAuthenticated';
 import uploadConfig from '../config/upload';
 
@@ -9,14 +11,6 @@ const UsersRouter = Router();
 
 const upload = multer(uploadConfig);
 
-interface ResponseUserDTO {
-  name: string;
-  email: string;
-  password?: string;
-  created_at: Date;
-  updated_at: Date;
-  id: string;
-}
 UsersRouter.post('/', async (request, response) => {
   try {
     const { name, email, password } = request.body;
@@ -27,9 +21,14 @@ UsersRouter.post('/', async (request, response) => {
       email,
       password,
     });
-    const newUser: ResponseUserDTO = { ...user };
-    delete newUser.password;
-    return response.json(newUser);
+    const userWithoutPassword = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+    };
+    return response.json(userWithoutPassword);
   } catch (err) {
     return response.status(400).json({ error: err.message });
   }
@@ -39,8 +38,24 @@ UsersRouter.patch(
   '/avatar',
   ensureAuthenticated,
   upload.single('avatar'),
-  (request, response) => {
-    return response.json();
+  async (request, response) => {
+    try {
+      const updateAvatar = new UpdateUserService();
+      const user = await updateAvatar.execute({
+        user_id: request.user.id,
+        avatarFilename: request.file.filename,
+      });
+      const userWithoutPassword = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      };
+      return response.json(userWithoutPassword);
+    } catch (err) {
+      return response.status(400).json({ error: err.message });
+    }
   },
 );
 export default UsersRouter;
