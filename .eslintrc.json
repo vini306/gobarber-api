@@ -38,8 +38,7 @@
     ],
     "prettier/prettier": "error",
     "arrow-parens": ["error", "as-needed"],
-    "function-paren-newline": ["off"],
-
+    "function-paren-newline": ["off"]
   },
   "settings": {
     "import/resolver": {
